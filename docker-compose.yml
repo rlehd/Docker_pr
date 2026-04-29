@@ -1,0 +1,43 @@
+services:
+  djangotest:
+    build: ./myDjango
+    networks:
+      - mynetwork
+    depends_on:
+      - postgrestest
+    environment:
+      - DATABASE_URL=postgres://postgres:mysecretpassword@postgrestest:5432/postgres
+    volumes:
+      - ./myDjango:/usr/src/app    
+    restart: always
+    ports:
+      - "8000:8000"
+
+  nginxtest:
+    build: ./myNginx
+    networks:
+      - mynetwork
+    ports:
+      - "8080:80"
+    depends_on:
+      - djangotest
+    restart: always
+
+  postgrestest:
+    image: postgres:15.4
+    networks:
+      - mynetwork
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: mysecretpassword
+      POSTGRES_DB: postgres
+    volumes:
+      - myvolume:/var/lib/postgresql/data
+    restart: always
+
+networks:
+  mynetwork:
+
+volumes:
+  myvolume:
+

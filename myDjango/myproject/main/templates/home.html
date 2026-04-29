@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS DICT.</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+    <style>
+        :root { --primary: #2d3436; --accent: #0984e3; --bg: #f5f6fa; --text: #2d3436; }
+        body { font-family: 'Pretendard', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 40px 20px; }
+        .container { max-width: 900px; margin: 0 auto; }
+
+        header { text-align: left; margin-bottom: 40px; display: flex; justify-content: space-between; align-items: flex-end; }
+        h1 { font-size: 1.5rem; font-weight: 800; letter-spacing: -1px; margin: 0; }
+        .btn-add { text-decoration: none; font-size: 0.9rem; color: var(--accent); font-weight: 600; }
+
+        /* 🎯 엑셀 다운로드 버튼 스타일 */
+        .btn-export {
+            text-decoration: none;
+            font-size: 0.85rem;
+            color: #636e72;
+            font-weight: 500;
+            margin-right: 15px;
+            padding: 5px 10px;
+            border: 1px solid #dfe6e9;
+            border-radius: 6px;
+            transition: 0.2s;
+        }
+        .btn-export:hover { background: #f1f2f6; color: var(--accent); border-color         : var(--accent); }
+
+        .search-box { width: 100%; border: none; border-bottom: 2px solid #dfe6e9;          background: transparent; padding: 10px 0; font-size: 1.1rem; margin-bottom         : 30px; outline: none; transition: 0.3s; }
+
+	.search-box:focus { border-color: var(--accent); }
+        .term-grid { display: flex; flex-direction: column; gap: 15px; }
+
+       
+        .term-card { position: relative; background: white; padding: 18px 25px; bor         der-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); transition: 0.3s        ; border: 1px solid #eee; }
+
+	.term-card:hover { transform: translateY(-3px); box-shadow: 0 8px 15px rgba        (0,0,0,0.05); }
+      
+
+        .term-header { display: flex; align-items: baseline; margin-bottom: 8px; gap: 10px; }
+        .term-title { font-size: 1.2rem; font-weight: 700; color: var(--primary); margin: 0; }
+        .term-eng { font-size: 0.85rem; color: #636e72; text-transform: uppercase; font-weight: 500; }
+        
+        .term-desc { font-size: 0.95rem; line-height: 1.5; color: #2d3436; margin: 0 0 15px 0; }
+
+        /* 위키백과 섹션 스타일 */
+        .wiki-section { 
+            background: #f9f9f9; 
+            padding: 12px; 
+            border-radius: 8px; 
+            font-size: 0.85rem; 
+            color: #636e72; 
+            cursor: pointer; 
+            transition: 0.2s;
+            border: 1px solid transparent;
+        }
+        .wiki-section:hover { background: #f1f2f6; border-color: #dfe6e9; }
+        .wiki-label { font-weight: bold; color: var(--accent); display: block; margin-bottom: 5px; font-size: 0.75rem; }
+        
+        .full-text { line-height: 1.6; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>CS DICT.</h1>
+            <div>
+                <a href="{% url 'export_csv' %}" class="btn-export">📥 엑셀 내보내기</a>
+                <a href="{% url 'add_word' %}" class="btn-add">+ NEW TERM</a>
+            </div>
+        </header>
+
+        <input type="text" id="searchInput" class="search-box" placeholder="단어 이름이나 영어 표기로 검색하세요...">
+
+        <div class="term-grid">
+            {% for term in terms %}
+            <div class="term-card">
+                
+                <div style="position: absolute; top: 18px; right: 20px; display: flex; gap: 12px; z-index: 10;">
+                    <a href="{% url 'edit_word' term.pk %}" style="text-decoration: none; font-size: 1.1rem; filter: grayscale(100%); transition: 0.3s;" onmouseover="this.style.filter='grayscale(0%)'" onmouseout="this.style.filter='grayscale(100%)'" title="수정">✏️</a>
+		    <a href="{% url 'delete_word' term.pk %}" style="text-decoration: none; color: #b2bec3; font-size: 1.3rem; line-height: 1; transition: 0.3s;" onmouseover="this.style.color='#ff7675'" onmouseout="this.style.color='#b2bec3'" onclick="return confirm('이 용어를 삭제하시겠습니까?')" title="삭제">&times;</a>
+                </div>
+
+                <div class="term-header">
+                    <span class="term-title">{{ term.word }}</span>
+                    <span class="term-eng">{{ term.english_word }}</span>
+                </div>
+
+                <p class="term-desc">{{ term.easy_explanation }}</p>
+
+                <div class="wiki-section" onclick="toggleWiki(this)">
+                    <span class="wiki-label">WIKIPEDIA (더보기)</span>
+                    <span class="summary-text">{{ term.official_definition|truncatechars:100 }}</span>
+                    <span class="full-text" style="display: none;">{{ term.official_definition }}</span>
+                </div>
+            </div>
+            {% empty %}
+            <p style="grid-column: 1/-1; text-align: center; color: #b2bec3; padding-top: 50px;">등록된 용어가 없습니다.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        // 1. 실시간 검색 기능 (한글/영어 모두 대응)
+        document.getElementById('searchInput').addEventListener('keyup', function() {
+            let filter = this.value.toUpperCase();
+            let cards = document.getElementsByClassName('term-card');
+
+            for (let i = 0; i < cards.length; i++) {
+                let title = cards[i].querySelector('.term-title').innerText;
+                let eng = cards[i].querySelector('.term-eng').innerText;
+
+                if (title.toUpperCase().indexOf(filter) > -1 || eng.toUpperCase().indexOf(filter) > -1) {
+                    cards[i].style.display = "";
+                } else {
+                    cards[i].style.display = "none";
+                }
+            }
+        });
+
+        // 2. 위키백과 더보기 토글 기능
+        function toggleWiki(element) {
+            const summary = element.querySelector('.summary-text');
+            const full = element.querySelector('.full-text');
+            const label = element.querySelector('.wiki-label');
+
+            if (full.style.display === "none") {
+                full.style.display = "inline";
+                summary.style.display = "none";
+                label.innerText = "WIKIPEDIA (접기)";
+            } else {
+                full.style.display = "none";
+                summary.style.display = "inline";
+                label.innerText = "WIKIPEDIA (더보기)";
+            }
+        }
+    </script>
+</body>
+<html>
+
