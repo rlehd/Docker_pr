@@ -1,6 +1,6 @@
 import requests, csv
 from urllib.parse import quote
-from django.shortcuts import render, redirect, get_object_or_404  # 🎯 get_object_or_404 추가됨
+from django.shortcuts import render, redirect, get_object_or_404  
 from .models import CsTerm
 from django.http import HttpResponse
 
@@ -57,25 +57,25 @@ def add_word(request):
 
         try:
             if word:
-                # 1. 한글 단어 인코딩
+                
                 encoded_word = quote(word)
                 url = f"https://ko.wikipedia.org/api/rest_v1/page/summary/{encoded_word}"
 
-                # 2. API 요청 헤더 (봇 차단 방지)
+                
                 headers = {
                     'User-Agent': 'MyCSDictionaryApp/1.0 (kgh@example.com)'
                 }
 
                 response = requests.get(url, headers=headers, timeout=5)
 
-                # 3. 성공했을 때 데이터 추출
+                
                 if response.status_code == 200:
                     data = response.json()
                     official_def = data.get('extract', official_def)
         except Exception as e:
             print(f"API 호출 중 에러 발생: {e}")
 
-        # 4. DB에 저장 (모델 필드명은 CsTerm 모델과 일치해야 함)
+        
         CsTerm.objects.create(
             word=word,
             english_word=english_word,
@@ -84,5 +84,5 @@ def add_word(request):
         )
         return redirect('index')
 
-    # POST 요청이 아닐 때(페이지 처음 들어왔을 때)
+    
     return render(request, 'add.html')
