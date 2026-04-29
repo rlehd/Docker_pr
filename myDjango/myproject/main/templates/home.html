@@ -14,7 +14,7 @@
         h1 { font-size: 1.5rem; font-weight: 800; letter-spacing: -1px; margin: 0; }
         .btn-add { text-decoration: none; font-size: 0.9rem; color: var(--accent); font-weight: 600; }
 
-        /* 🎯 엑셀 다운로드 버튼 스타일 */
+        
         .btn-export {
             text-decoration: none;
             font-size: 0.85rem;
@@ -45,7 +45,7 @@
         
         .term-desc { font-size: 0.95rem; line-height: 1.5; color: #2d3436; margin: 0 0 15px 0; }
 
-        /* 위키백과 섹션 스타일 */
+        
         .wiki-section { 
             background: #f9f9f9; 
             padding: 12px; 
@@ -67,7 +67,7 @@
         <header>
             <h1>CS DICT.</h1>
             <div>
-                <a href="{% url 'export_csv' %}" class="btn-export">📥 엑셀 내보내기</a>
+                <a href="{% url 'export_csv' %}" class="btn-export">엑셀 내보내기</a>
                 <a href="{% url 'add_word' %}" class="btn-add">+ NEW TERM</a>
             </div>
         </header>
@@ -79,7 +79,7 @@
             <div class="term-card">
                 
                 <div style="position: absolute; top: 18px; right: 20px; display: flex; gap: 12px; z-index: 10;">
-                    <a href="{% url 'edit_word' term.pk %}" style="text-decoration: none; font-size: 1.1rem; filter: grayscale(100%); transition: 0.3s;" onmouseover="this.style.filter='grayscale(0%)'" onmouseout="this.style.filter='grayscale(100%)'" title="수정">✏️</a>
+                    <a href="{% url 'edit_word' term.pk %}" style="text-decoration: none; font-size: 1.1rem; filter: grayscale(100%); transition: 0.3s;" onmouseover="this.style.filter='grayscale(0%)'" onmouseout="this.style.filter='grayscale(100%)'" title="수정"></a>
 		    <a href="{% url 'delete_word' term.pk %}" style="text-decoration: none; color: #b2bec3; font-size: 1.3rem; line-height: 1; transition: 0.3s;" onmouseover="this.style.color='#ff7675'" onmouseout="this.style.color='#b2bec3'" onclick="return confirm('이 용어를 삭제하시겠습니까?')" title="삭제">&times;</a>
                 </div>
 
@@ -103,7 +103,7 @@
     </div>
 
     <script>
-        // 1. 실시간 검색 기능 (한글/영어 모두 대응)
+        
         document.getElementById('searchInput').addEventListener('keyup', function() {
             let filter = this.value.toUpperCase();
             let cards = document.getElementsByClassName('term-card');
@@ -120,7 +120,7 @@
             }
         });
 
-        // 2. 위키백과 더보기 토글 기능
+        
         function toggleWiki(element) {
             const summary = element.querySelector('.summary-text');
             const full = element.querySelector('.full-text');
